@@ -1,19 +1,28 @@
-# Module d'import d'un fichier
+### file import module ###
+
+# input: a csv file with at least 2 columns :
+# - postcodes
+# - adresses
+# output: a reactive list (see below)
+
+
 library(shinyjs)
 library(httr)
 library(RCurl)
 
+
+# UI function -------------------------------------------------------------
+
 uploadModuleUI <- function(id) {
+  # namespace
   ns <- NS(id)
-  
-  # éléments de l'UI
+  # UI elements
   tagList(
-    sidebarPanel(align = "center",
-      shinyjs::useShinyjs(),
-      width = 3,  
+    sidebarPanel(width = 3,
+      # input fields
       fileInput(ns("file"), "Sélectionner un fichier CSV"),
       textInput(ns("na.string"), "Champs vides", value = "NA"),
-      selectInput(ns("champ_commune"), label = "Champ du code INSEE", choices = '', selected = NULL),
+      # selectInput(ns("champ_commune"), label = "Champ du code INSEE", choices = '', selected = NULL),
       selectInput(ns("champ_code_postal"), label = "Champ du code postal *", choices = NULL, selected = NULL),
       selectInput(ns("champ_adresse"), label = "Champ d'adresse *", choices = NULL, selected = NULL),
       actionButton(ns("geocoder"), "Géocoder")
@@ -22,26 +31,36 @@ uploadModuleUI <- function(id) {
 }
 
 
-# Fonction serveur
+# server function ---------------------------------------------------------
+
 uploadModule <- function(input, output, session) {
   
-  # valeurs réactives
+  # reactive values container
   values <- reactiveValues()
   
+  # activate the geocoding button only if a file is imported
+  observe({
+    shinyjs::toggleState("geocoder", condition = (!is.null(values$df_import)))
+  })
+  
+  ## file import ##
   observeEvent(input$file, {
+    
+    # imported data
     values$df_import <- read.csv(input$file$datapath,
                                  stringsAsFactors = FALSE,
                                  na.string = input$na.string)
+    # reset the BAN dataframe
     values$df_ban <-  NULL
     
+    # reactive values that will contain the column indexes of the
+    # score and of the columns to hide
     values$df_columns_index <- list(
       score = NULL,
       invisible = NULL
     )
-    cat(file=stderr(), "upload_visible_file", paste(values$df_columns_index$invisible), "\n")
-    cat(file=stderr(), "upload_score_file", paste(values$df_columns_index$score), "\n")
     
-    # mise à jour des champs
+    # populate the sidebar fields with the dataframe columns
     updateSelectInput(session, 
                       "champ_commune", 
                       label = "Champ du code INSEE", 
@@ -59,18 +78,17 @@ uploadModule <- function(input, output, session) {
                       label = "Champ d'adresse *", 
                       choices = names(values$df_import),
                       selected = NULL)
+    
+    # print to console
+    cat(file=stderr(), "File imported:", input$file$datapath, "\n")
+    
   })
   
-  # désactiver bouton "géocoder" si aucun fichier importé
-  observe({
-    shinyjs::toggleState("geocoder", condition = (!is.null(values$df_import)))
-  })
-  
-  ### géocodage
+  ## geocoding ##
   observeEvent(input$geocoder, {
     
-    ## envoi à la BAN
-    cat(file=stderr(), "requête BAN", "\n")
+    # send the input file to the BAN API and the result
+    cat(file=stderr(), "Geocoding", "\n")
     queryResults <- POST("http://api-adresse.data.gouv.fr/search/csv/",
                          body=list(data=upload_file(input$file$datapath,
                                                     type = "text/csv; charset=UTF-8"
@@ -79,47 +97,53 @@ uploadModule <- function(input, output, session) {
                          postcode = input$champ_code_postal
                          )
     )
+    # the dataframe is returned with new columns
     values$df_ban <- as.data.frame(content(queryResults), header = TRUE)
-    values$df_ban['geocodID'] <- seq(1:nrow(values$df_ban))
-    # colonne checkbox, avec valeurs par défaut
-    # values$df_ban <- cbind(corriger = ifelse(values$df_ban$result_score < 0.59 | is.na(values$df_ban$result_score), TRUE, FALSE), values$df_ban)
     
-    ## infos sur le tableau pour sa mise-en-forme
-    # indices des colonnes "code postal" et "adresse"
+    # create a unique ID for each row
+    values$df_ban['geocodID'] <- seq(1:nrow(values$df_ban))
+    
+    
+    ## get information about the dataframe columns ##
+    # this will be useful for the dataframe formatting (in the dataframeModule)
+    
+    # addresse and postcode columns indexes (input fields)
     indices_cdp_adr <- list(
       grep( paste("^", input$champ_code_postal, "$" , sep="", collapse=""), names(values$df_ban)) - 1,
       grep( paste("^", input$champ_adresse, "$", sep="", collapse=""), names(values$df_ban)) - 1
     )
-    cat(file=stderr(), "upload_indices_champs", paste(indices_cdp_adr), "\n")
+    cat(file=stderr(), "Postcode and addresse column indexes:", paste(indices_cdp_adr), "\n")
     
-    # indices des colonnes BAN utiles
+    # BAN columns to show
     colonnes_ban_noms <- c("result_label", "result_type", "result_score")
     colonnes_ban_indices <- lapply(colonnes_ban_noms, 
                                    function(x) {grep( paste("^", x, "$", sep="", collapse=""), names(values$df_ban)) - 1})
     
-    # colonnes à afficher : (champs + BAN utile)
+    # columns to show : both input fields and useful BAN columns
     colonnes_afficher <- append(indices_cdp_adr, as.numeric(unlist(colonnes_ban_indices)))
-    cat(file=stderr(), "upload_affich", paste(colonnes_afficher), "\n")
     
-    # colonnes à ne pas afficher : les autres
+    # columns to hide : the remaining
     colonnes_pas_afficher <- setdiff(2:length(values$df_ban)-1, colonnes_afficher)
-    cat(file=stderr(), "upload_pasaffich", paste(colonnes_pas_afficher), "\n")
     
-    # colonne result_score
+    # result_score column
     score <- grep("^result_score$", names(values$df_ban)) - 1
-    cat(file=stderr(), "upload_score", paste(score), "\n")
     
-    # retour des valeurs pour affichage d3tf
+    # reactive value containing the column indexes
     values$df_columns_index <- list(
-      # indice colonne "result_score"
       score = score,
       invisible = colonnes_pas_afficher
     )
-    cat(file=stderr(), "upload_colinvisible", paste(values$df_columns_index$invisible), "\n")
-    cat(file=stderr(), "type de values$df_columns_index$invisible :", paste(class(values$df_columns_index$invisible)), "\n")
+    cat(file=stderr(), "Hidden columns:", paste(values$df_columns_index$invisible), "\n")
   })
   
+  ## reactive output ##
+  # a named list containing :
+  #   - df : a dataframe  
+  #   - geocode : the "geocoding switch" (True if the geocoding happened, else False), useful in the next modules
+  #   - df_columns_index : the column indexes to hide by default
+  
   reactive({
+    # if the BAN dataframe exists : geocode is True, else False
     if ( is.null(values$df_ban) ) {
       return(list(df = values$df_import, geocode = FALSE, col_indices = values$df_columns_index))
     } else {

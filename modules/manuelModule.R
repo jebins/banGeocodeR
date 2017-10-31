@@ -1,13 +1,15 @@
+### manual geocoding module ###
+
 library(htmlwidgets)
 library(DT)
 library(leaflet)
 
-# données postales
+## postcodes file ##
 laposte <- read.csv('data/codes_postaux_laposte.csv', sep = ',', stringsAsFactors = FALSE)
 laposte[is.na(laposte)] <- "Tout"
 
-# ShinyJS
-# splitter
+## ShinyJS ##
+# JS splitter: table <-> main map
 jscode <- "
 shinyjs.init = function () {
     Split(['#tabmanuel', '#carte'], {
@@ -19,8 +21,7 @@ shinyjs.init = function () {
 }"
 
 
-# UI ----------------------------------------------------------------------
-
+# UI function ----------------------------------------------------------------------
 
 manuelUI <- function(id) {
   ns <- NS(id)
@@ -28,7 +29,7 @@ manuelUI <- function(id) {
   tagList(
     tags$head(
       tags$script(HTML(jscode)),
-      # boutton de suppression dans tableau
+      ## inrow delete button ##
       tags$script(sprintf("
 $(document).on('click', '#tabmanuel-tabmanuel button', function () {
  console.log('suppression ligne');
@@ -85,18 +86,10 @@ $(document).on('click', '#tabmanuel-tabmanuel button', function () {
  }
                       "))
       ),
-    
-
-    # colonne : par défaut il y a un margin et padding
-    # ligne 1
-    # fluidRow(id = "haut", style = "position:relative; margin:auto; padding:auto; background-color: blue; text-align:center; height:50%;",
 
       column(class = "left-top", width = 9, style = "margin:0; padding:0;",
-
-             # tags$div(id = "champs", style = "background-color: green; height:150px",
                  
                  inputPanel(
-                 # inputPanel(align = "center",
                             selectizeInput(ns("p1"), choices = laposte$Nom_commune, selected = NULL, 
                                            label = NULL, options = list(placeholder = "Commune")),
                             selectizeInput(ns("p2"), choices = laposte$Code_postal, selected = NULL, 
@@ -182,13 +175,8 @@ $(document).on('click', '#tabmanuel-tabmanuel button', function () {
       ),
       column(class = "right-top", width = 3, style = "padding:0;",
 
-             # tags$div(style = "height:50px;" ,
                        leafletOutput(ns("minimap"), height = "150px")
-                       # )
       ),
-    # ),
-    # ligne 2
-    # fluidRow(id = "bas", style = "margin:auto; padding:auto; background-color: lightblue; text-align:center; height:100%;",
 
              tags$div(id = "tabmanuel", class = "split", style = "height:500px; float:left;",
                     DT::dataTableOutput(ns("tabmanuel"), height = "100%", width = "100%")
@@ -198,36 +186,36 @@ $(document).on('click', '#tabmanuel-tabmanuel button', function () {
                     # carte finale
                     leafletOutput(ns("map"), height = "100%", width = "100%")
              )
-    # )
   )
 }
 
 
 
-# SERVEUR -----------------------------------------------------------------
-
+# server function -----------------------------------------------------------------
 
 manuelModule <- function(input, output, session, data) {
   
   ns <- session$ns
   
-  # valeurs réactives
+  # reactive values
   values <- reactiveValues()
   
-  # créer un tableau vide
+  # empty dataframe that will contain the addresses
   values$adressesMan <- data.frame()
   
-  # # champs d'adresse : code postal
+  ## auto-update the input fields ##
+  # commune -> postcode
   observe({
     cdp <- laposte$Code_postal[laposte$Nom_commune == input$p1]
     updateSelectInput(session, "p2", "Code_postal", choices = unique(cdp))
   })
   
-  # champs d'adresse : ligne
+  # postcode -> ligne postale
   observe({
     lig <- laposte$Ligne_5[laposte$Code_postal == input$p2]
-    if ( any(unique(lig) == 'Tout') ) {  # si ligne contient "Tout"
-      selec <- 'Tout' # sélection par défaut vaut "Tout"
+    if ( any(unique(lig) == 'Tout') ) {
+      # selection by default
+      selec <- 'Tout'
     } else {
       selec <- ''
     }
@@ -235,7 +223,7 @@ manuelModule <- function(input, output, session, data) {
     session$sendCustomMessage("codePostalMessage", input$p2)  # message JS pour ajax : code postal
   })
   
-  # boutton "ajouter"
+  # activate "Ajouter" button only if an addresse is selected
   observe({
     shinyjs::toggleState("ajouterAdresseBtn", condition = (!is.null(input$adresses)))
   })
@@ -247,7 +235,7 @@ manuelModule <- function(input, output, session, data) {
     cat(file=stderr(), paste(values$adresseSelec), "\n")
   })
   
-  # adresse sélectionnée
+  # selected addresse
   adresseSelec <- reactive({
     req(input$adresses)
     df <- values$adresseSelec
@@ -255,7 +243,7 @@ manuelModule <- function(input, output, session, data) {
     return(df)
   })
   
-  #### TABMANUEL ####
+  ## TABMANUEL ##
   
   # ajouter adresse au df final
   # boutton "ajouter"
@@ -266,7 +254,7 @@ manuelModule <- function(input, output, session, data) {
   observeEvent(input$ajouterAdresseBtn, {
     values$adresseSelec['Commentaire'] <- paste(input$commentaire)
     values$adressesMan <- rbind( values$adressesMan, as.data.frame(values$adresseSelec))
-    updateTextInput(session, 'commentaire', label = 'Commentaire', value = '', placeholder = 'Détails de la correction')
+    updateTextInput(session, 'commentaire', label = 'Commentaire', value = '', placeholder = 'Commentaire')
     updateSelectInput(session, "adresses", "adresse", selected = '')
     cat(file=stderr(), class(values$adressesMan), "\n")
     cat(file=stderr(), nrow(values$adressesMan), "\n")
@@ -304,7 +292,7 @@ manuelModule <- function(input, output, session, data) {
     ), names(tabmanuel_()) ) - 1
   })
   
-  # supprimer ligne
+  # delete row
   observeEvent(input$lastClick, {
     if (grepl("delete", input$lastClickId)) {
       row_to_del <- as.numeric(gsub("delete_", "", input$lastClickId))
@@ -344,8 +332,7 @@ manuelModule <- function(input, output, session, data) {
   })
   
   
-  #### MINI CARTE ####
-  
+  ## mini map ##
   output$minimap <- renderLeaflet({
     
     leaflet() %>%
@@ -360,13 +347,12 @@ manuelModule <- function(input, output, session, data) {
   })
   
   
-  #### CARTE ####
-  
+  ## main map ##
   # proxies
   proxyTab <- dataTableProxy(ns('tabmanuel'), session = session)
   proxyMap <- leafletProxy(ns('map'), session = session)
   
-  # clic marker -> selectionner ligne
+  # click on map marker -> select DT row
   observeEvent(input$map_marker_click, {
     proxyTab %>% selectRows( which(tabmanuel_()$result_label == paste(input$map_marker_click)[1]) )
     # cat(file=stderr(),"clicked marker", input$map_marker_click[1],'\n')
@@ -376,13 +362,13 @@ manuelModule <- function(input, output, session, data) {
     cat(file=stderr(), input$tabmanuel_rows_selected, '\n')
   })
   
-  # clic ligne -> zoomer marker
+  # DT row selection -> zoom to map marker
   observeEvent(input$tabmanuel_rows_selected, {
     proxyMap %>% setView(lng = tabmanuel_()[input$tabmanuel_rows_selected[1], "longitude"], lat = tabmanuel_()[input$tabmanuel_rows_selected, "latitude"], zoom = 15)
     # cat(file=stderr(),"clicked row", rowClic$clickedRow, '\n')
   })
-    
-  # style de la carte
+  
+  # map labels styling
   labels <- reactive({
     sprintf(
       "<h5>%s</h5>",
@@ -390,6 +376,7 @@ manuelModule <- function(input, output, session, data) {
     ) %>% lapply(htmltools::HTML)
   })
   
+  # map function
   carte <- reactive({
     leaflet() %>%
       addProviderTiles("CartoDB.Positron", 
@@ -404,6 +391,7 @@ manuelModule <- function(input, output, session, data) {
       ) 
   })
   
+  # map rendering
   output$map <- renderLeaflet({
     if ( !is.null(tabmanuel_())) {
       carte()

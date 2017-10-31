@@ -1,9 +1,16 @@
+### dataframe diplaying module ###
+# input: the reactive output of importModule
+# output: a reactive list (see below)
+
+
 library(DT)
 library(RColorBrewer)
 
+
+# UI function -------------------------------------------------------------
+
 DTtableUI <- function(id) {
   ns <- NS(id)
-  
   tagList(
     column(width = 9,
            withSpinner(color="#0dc5c1", DT::dataTableOutput(ns('table')))
@@ -11,22 +18,21 @@ DTtableUI <- function(id) {
   )
 }
 
-# serveur
+
+# server function ---------------------------------------------------------
+
 DTtable <- function(input, output, session, data) {
   
-  # pré-sélection des lignes
+  # select addresses with a result_score < 0.6 by default
   selection <- reactive({
     if ( data()$geocode ) {
-      return(list(mode = 'multiple', selected = which(data()$df$result_score < 0.59 | is.na(data()$df$result_score))))
+      return(list(mode = 'multiple', selected = which(data()$df$result_score < 0.6 | is.na(data()$df$result_score))))
     } else {
-      return(list(mode = 'multiple', selected = NULL)) # À MODIFIER APRÈS TESTS (SINGLE)
+      return(list(mode = 'none', selected = NULL))
     }
   })
   
-  # observeEvent(input$table_rows_selected, {
-  #   cat(file=stderr(), paste(input$table_rows_selected), "\n")
-  # })
-  
+  ## datatable ##
   table <- reactive({
     
     datatable(data()$df,
@@ -37,9 +43,8 @@ DTtable <- function(input, output, session, data) {
               selection = selection(),
               options = list(pageLength = 15,
                              autoWidth = FALSE,
-                             # scrollX = TRUE,
                              fixedHeader = FALSE,
-                             dom = 'lfBrtip', #lsp
+                             dom = 'lfBrtip',
                              buttons = list(list(extend = 'collection',
                                                  buttons = c('csv', 'excel'),
                                                  text = 'Enregistrer'),
@@ -55,7 +60,8 @@ DTtable <- function(input, output, session, data) {
   
   output$table <- DT::renderDataTable({
     
-    # formattage colonne result_score
+    ## result_score column formatting ##
+    # only if the dataframe was geocoded
     if (data()$geocode) {
 
       brks <- quantile(data()$df$result_score, probs = seq(0.1, 0.9, 0.1), na.rm = TRUE)
@@ -79,11 +85,11 @@ DTtable <- function(input, output, session, data) {
     
   })
   
-  # tableau sélectionné en sortie + colonnes cachées
+  ## reactive output ##
+  # df : dataframe containing the selected rows
+  # col_indices : 
   reactive({
-    
     return(list( df = data()$df[input$table_rows_selected, ], col_indices = data()$col_indices$invisible))
-    
   })
   
 }

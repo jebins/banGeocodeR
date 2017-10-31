@@ -1,21 +1,32 @@
-# module de carte dynamique
+### map module ###
+# input : 
+# - geocoded dataframe (importModule)
+# - edited rows (correctionModule)
+
 library(leaflet)
 library(plyr)
 
 
+# UI function -------------------------------------------------------------
+
 leafletModuleUI <- function(id) {
   ns <- NS(id)
+  
   tagList(
     downloadButton(ns("enregistrer"), "Enregistrer les données"),
     leafletOutput(ns("map"))
   )
 }
 
+
+# server function ---------------------------------------------------------
+
 leafletModule <- function(input, output, session, data_brut, data_corr) {
   
-  # prise en compte des corrections sur la carte
+  ## reactive dataframe : ##
+  # - if rows were edited in the correction module : (orginal df - rows edited) + rows edited
+  # - else : original df
   data_all <- reactive({
-    cat(file=stderr(), "id_modif:", data_corr()$id_modif, "\n")
     if ( !is.null(data_corr()$id_modif) ) {
       df1 <- data_brut()$df[-data_corr()$df$geocodID, ]
       df2 <- data_corr()$df
@@ -25,6 +36,7 @@ leafletModule <- function(input, output, session, data_brut, data_corr) {
     }
   })
   
+  ## download data ##
   output$enregistrer <- downloadHandler(
     filename = function() {
       paste("geocoded", ".csv", sep = "")
@@ -34,7 +46,8 @@ leafletModule <- function(input, output, session, data_brut, data_corr) {
     }
   )
   
-  
+  ## map rendering ##
+  # input : the reactive dataframe
   output$map <- renderLeaflet({
     
     if (data_brut()$geocode) {
