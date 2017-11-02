@@ -3,11 +3,11 @@
 ### Copyright (C) 2017 Jérémy Commmins <jebins@openaliasbox.org> ###
 
 # modules
-source("modules/DTModule.R")
-source("modules/uploadModule.R")
-source("modules/leafletModule.R")
-source("modules/correctionModule.R")
-source("modules/manuelModule.R")
+source("modules/csvDatatableModule.R")
+source("modules/csvUploadModule.R")
+source("modules/csvMapModule.R")
+source("modules/csvCorrectionModule.R")
+source("modules/manualGeocodingModule.R")
 
 # packages
 library(shiny)
