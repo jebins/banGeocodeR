@@ -5,7 +5,7 @@ library(DT)
 library(leaflet)
 
 ## postcodes file ##
-laposte <- read.csv('data/codes_postaux_laposte.csv', sep = ',', stringsAsFactors = FALSE)
+laposte <- read.csv("data/codes_postaux_laposte.csv", sep = ",", stringsAsFactors = FALSE)
 laposte[is.na(laposte)] <- "Tout"
 
 ## ShinyJS ##
@@ -90,22 +90,22 @@ $(document).on('click', '#tabmanuel-tabmanuel button', function () {
       column(class = "left-top", width = 9, style = "margin:0; padding:0;",
                  
                  inputPanel(
-                            selectizeInput(ns("p1"), choices = laposte$Nom_commune, selected = NULL, 
+                            selectizeInput(ns("commune_field"), choices = laposte$Nom_commune, selected = NULL, 
                                            label = NULL, options = list(placeholder = "Commune")),
-                            selectizeInput(ns("p2"), choices = laposte$Code_postal, selected = NULL, 
-                                           label = NULL, options = list(placeholder = "Code postal", plugins = list('restore_on_backspace'))),
-                            selectizeInput(ns("p3"), choices = laposte$Ligne_5, selected = NULL, 
-                                           label = NULL, options = list(placeholder = "Ligne postale", plugins = list('restore_on_backspace'))),
+                            selectizeInput(ns("postcode_field"), choices = laposte$Code_postal, selected = NULL, 
+                                           label = NULL, options = list(placeholder = "Code postal", plugins = list("restore_on_backspace"))),
+                            selectizeInput(ns("line_field"), choices = laposte$Ligne_5, selected = NULL, 
+                                           label = NULL, options = list(placeholder = "Ligne postale", plugins = list("restore_on_backspace"))),
                             
-                            selectizeInput(ns('adresses'), label = NULL, choices = '', options = list(
-                              placeholder = 'Entrer un adresse',
-                              valueField = 'result_name',
-                              labelField = 'result_name',
-                              searchField = 'result_name',
+                            selectizeInput(ns("address_field"), label = NULL, choices = "", options = list(
+                              placeholder = "Entrer un adresse",
+                              valueField = "result_name",
+                              labelField = "result_name",
+                              searchField = "result_name",
                               sortField = I("[{field: 'result_score', direction: 'desc'}, {field: '$score'}]"),
-                              loadThrottle = '500',
+                              loadThrottle = "500",
                               maxOptions = 5,
-                              plugins = list('restore_on_backspace'),
+                              plugins = list("restore_on_backspace"),
                               onChange = I(sprintf("
                                                    function(value, $item) {
                                                    var data = this.options[value];
@@ -168,7 +168,7 @@ $(document).on('click', '#tabmanuel-tabmanuel button', function () {
                                        }"
                               )
                             )), # ~ adresses
-                 textInput(ns("commentaire"), label = NULL, placeholder = "Commentaires"),
+                 textInput(ns("comment_field"), label = NULL, placeholder = "Commentaires"),
                  actionButton(ns("ajouterAdresseBtn"), "Ajouter")
                  
                  )
@@ -206,38 +206,38 @@ manuelModule <- function(input, output, session, data) {
   ## auto-update the input fields ##
   # commune -> postcode
   observe({
-    cdp <- laposte$Code_postal[laposte$Nom_commune == input$p1]
-    updateSelectInput(session, "p2", "Code_postal", choices = unique(cdp))
+    cdp <- laposte$Code_postal[laposte$Nom_commune == input$commune_field]
+    updateSelectInput(session, "postcode_field", "Code_postal", choices = unique(cdp))
   })
   
   # postcode -> ligne postale
   observe({
-    lig <- laposte$Ligne_5[laposte$Code_postal == input$p2]
-    if ( any(unique(lig) == 'Tout') ) {
+    lig <- laposte$Ligne_5[laposte$Code_postal == input$postcode_field]
+    if ( any(unique(lig) == "Tout") ) {
       # selection by default
-      selec <- 'Tout'
+      selec <- "Tout"
     } else {
-      selec <- ''
+      selec <- ""
     }
-    updateSelectInput(session, "p3", "Ligne_5", choices = lig, selected = selec)
-    session$sendCustomMessage("codePostalMessage", input$p2)  # message JS pour ajax : code postal
+    updateSelectInput(session, "line_field", "Ligne_5", choices = lig, selected = selec)
+    session$sendCustomMessage("codePostalMessage", input$postcode_field)  # message JS pour ajax : code postal
   })
   
   # activate "Ajouter" button only if an addresse is selected
   observe({
-    shinyjs::toggleState("ajouterAdresseBtn", condition = (!is.null(input$adresses)))
+    shinyjs::toggleState("ajouterAdresseBtn", condition = (!is.null(input$address_field)))
   })
   
   # JSON
   observeEvent(input$jsonFeature, {
-    cat(file=stderr(), paste("reçuuuuu json !"), "\n")
+    cat(file=stderr(), paste("JSON received"), "\n")
     values$adresseSelec <- input$jsonFeature
     cat(file=stderr(), paste(values$adresseSelec), "\n")
   })
   
   # selected addresse
   adresseSelec <- reactive({
-    req(input$adresses)
+    req(input$address_field)
     df <- values$adresseSelec
     df <- as.list(df)
     return(df)
@@ -245,29 +245,30 @@ manuelModule <- function(input, output, session, data) {
   
   ## TABMANUEL ##
   
-  # ajouter adresse au df final
-  # boutton "ajouter"
+  # add addresses to the final dataframe
+  # "ajouter" button
   observe({
-    shinyjs::toggleState("ajouterAdresseBtn", condition = (input$adresses != ""))
+    shinyjs::toggleState("ajouterAdresseBtn", condition = (input$address_field != ""))
   })
   
   observeEvent(input$ajouterAdresseBtn, {
-    values$adresseSelec['Commentaire'] <- paste(input$commentaire)
+    values$adresseSelec["comment_field"] <- paste(input$comment_field)
     values$adressesMan <- rbind( values$adressesMan, as.data.frame(values$adresseSelec))
-    updateTextInput(session, 'commentaire', label = 'Commentaire', value = '', placeholder = 'Commentaire')
-    updateSelectInput(session, "adresses", "adresse", selected = '')
+    updateTextInput(session, "comment_field", label = "Commentaire", value = "", placeholder = "Commentaire")
+    updateSelectInput(session, "address_field", "adresse", selected = "")
     cat(file=stderr(), class(values$adressesMan), "\n")
     cat(file=stderr(), nrow(values$adressesMan), "\n")
     print(values$adressesMan)
   })
   
+  # add inrow delete button
   tabmanuel_ <- reactive({
     df <- values$adressesMan
     if (!is.null(df) && nrow(df) > 0) {
-      df['Actions'] <- paste0('
-<div class="btn-group" role="group" aria-label="Basic example">
-<button type="button" class="btn btn-secondary delete" id=delete_', 1:nrow(df), '>Supprimer</button>
-</div>')
+      df["Actions"] <- paste0("
+<div class='btn-group' role='group' aria-label='Basic example'>
+<button type='button' class='btn btn-secondary delete' id=delete_", 1:nrow(df), ">Supprimer</button>
+</div>")
       return(df)
     } else {
       return(NULL)
@@ -297,7 +298,7 @@ manuelModule <- function(input, output, session, data) {
     if (grepl("delete", input$lastClickId)) {
       row_to_del <- as.numeric(gsub("delete_", "", input$lastClickId))
       values$adressesMan <- values$adressesMan[-row_to_del,]
-      cat(file=stderr(),"suppr", input$lastClickId,'\n')
+      cat(file=stderr(),"suppr", input$lastClickId,"\n")
     } 
   })
   
@@ -305,24 +306,24 @@ manuelModule <- function(input, output, session, data) {
     
     datatable(tabmanuel_(),
               rownames = FALSE,
-              style = 'bootstrap',
-              class = 'table-bordered table-condensed table-striped',
-              extensions = list('Buttons' = NULL),
-              selection = list(mode = 'single', selected = NULL),
+              style = "bootstrap",
+              class = "table-bordered table-condensed table-striped",
+              extensions = list("Buttons" = NULL),
+              selection = list(mode = "single", selected = NULL),
               escape = FALSE,
               options = list(pageLength = 15,
                              autoWidth = FALSE,
                              # scrollX = TRUE,
                              fixedHeader = FALSE,
-                             dom = 'Btp', #lBfrtip
-                             buttons = list(list(extend = 'collection',
-                                                 buttons = c('csv', 'excel'),
-                                                 text = 'Enregistrer'),
-                                            I('colvis')
+                             dom = "Btp", #lBfrtip
+                             buttons = list(list(extend = "collection",
+                                                 buttons = c("csv", "excel"),
+                                                 text = "Enregistrer"),
+                                            I("colvis")
                              ),
                              searchHighlight = TRUE,
                              columnDefs = list(list(visible = FALSE, targets = to_hide() )),
-                             language = list(url = '//cdn.datatables.net/plug-ins/1.10.13/i18n/French.json')
+                             language = list(url = "//cdn.datatables.net/plug-ins/1.10.13/i18n/French.json")
               )
     )
   })
@@ -349,23 +350,23 @@ manuelModule <- function(input, output, session, data) {
   
   ## main map ##
   # proxies
-  proxyTab <- dataTableProxy(ns('tabmanuel'), session = session)
-  proxyMap <- leafletProxy(ns('map'), session = session)
+  proxyTab <- dataTableProxy(ns("tabmanuel"), session = session)
+  proxyMap <- leafletProxy(ns("map"), session = session)
   
   # click on map marker -> select DT row
   observeEvent(input$map_marker_click, {
     proxyTab %>% selectRows( which(tabmanuel_()$result_label == paste(input$map_marker_click)[1]) )
-    # cat(file=stderr(),"clicked marker", input$map_marker_click[1],'\n')
+    # cat(file=stderr(),"clicked marker", input$map_marker_click[1],"\n")
   })
   
   observeEvent(input$tabmanuel_rows_selected, {
-    cat(file=stderr(), input$tabmanuel_rows_selected, '\n')
+    cat(file=stderr(), input$tabmanuel_rows_selected, "\n")
   })
   
   # DT row selection -> zoom to map marker
   observeEvent(input$tabmanuel_rows_selected, {
     proxyMap %>% setView(lng = tabmanuel_()[input$tabmanuel_rows_selected[1], "longitude"], lat = tabmanuel_()[input$tabmanuel_rows_selected, "latitude"], zoom = 15)
-    # cat(file=stderr(),"clicked row", rowClic$clickedRow, '\n')
+    # cat(file=stderr(),"clicked row", rowClic$clickedRow, "\n")
   })
   
   # map labels styling

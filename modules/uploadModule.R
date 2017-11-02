@@ -2,7 +2,7 @@
 
 # input: a csv file with at least 2 columns :
 # - postcodes
-# - adresses
+# - addresses
 # output: a reactive list (see below)
 
 
@@ -22,9 +22,8 @@ uploadModuleUI <- function(id) {
       # input fields
       fileInput(ns("file"), "Sélectionner un fichier CSV"),
       textInput(ns("na.string"), "Champs vides", value = "NA"),
-      # selectInput(ns("champ_commune"), label = "Champ du code INSEE", choices = '', selected = NULL),
-      selectInput(ns("champ_code_postal"), label = "Champ du code postal *", choices = NULL, selected = NULL),
-      selectInput(ns("champ_adresse"), label = "Champ d'adresse *", choices = NULL, selected = NULL),
+      selectInput(ns("postcode_field"), label = "Champ du code postal *", choices = NULL, selected = NULL),
+      selectInput(ns("address_field"), label = "Champ d'adresse *", choices = NULL, selected = NULL),
       actionButton(ns("geocoder"), "Géocoder")
     )
   )
@@ -62,19 +61,19 @@ uploadModule <- function(input, output, session) {
     
     # populate the sidebar fields with the dataframe columns
     updateSelectInput(session, 
-                      "champ_commune", 
+                      "commune_field", 
                       label = "Champ du code INSEE", 
                       choices = names(values$df_import),
-                      selected = '')
+                      selected = "")
     
     updateSelectInput(session, 
-                      "champ_code_postal", 
+                      "postcode_field", 
                       label = "Champ du code postal *", 
                       choices = names(values$df_import),
                       selected = NULL)
     
     updateSelectInput(session, 
-                      "champ_adresse", 
+                      "address_field", 
                       label = "Champ d'adresse *", 
                       choices = names(values$df_import),
                       selected = NULL)
@@ -93,15 +92,15 @@ uploadModule <- function(input, output, session) {
                          body=list(data=upload_file(input$file$datapath,
                                                     type = "text/csv; charset=UTF-8"
                          ),
-                         columns = input$champ_adresse,
-                         postcode = input$champ_code_postal
+                         columns = input$address_field,
+                         postcode = input$postcode_field
                          )
     )
     # the dataframe is returned with new columns
     values$df_ban <- as.data.frame(content(queryResults), header = TRUE)
     
     # create a unique ID for each row
-    values$df_ban['geocodID'] <- seq(1:nrow(values$df_ban))
+    values$df_ban["geocodID"] <- seq(1:nrow(values$df_ban))
     
     
     ## get information about the dataframe columns ##
@@ -109,10 +108,10 @@ uploadModule <- function(input, output, session) {
     
     # addresse and postcode columns indexes (input fields)
     indices_cdp_adr <- list(
-      grep( paste("^", input$champ_code_postal, "$" , sep="", collapse=""), names(values$df_ban)) - 1,
-      grep( paste("^", input$champ_adresse, "$", sep="", collapse=""), names(values$df_ban)) - 1
+      grep( paste("^", input$postcode_field, "$" , sep="", collapse=""), names(values$df_ban)) - 1,
+      grep( paste("^", input$address_field, "$", sep="", collapse=""), names(values$df_ban)) - 1
     )
-    cat(file=stderr(), "Postcode and addresse column indexes:", paste(indices_cdp_adr), "\n")
+    cat(file=stderr(), "Postcode and address columns indexes:", paste(indices_cdp_adr), "\n")
     
     # BAN columns to show
     colonnes_ban_noms <- c("result_label", "result_type", "result_score")

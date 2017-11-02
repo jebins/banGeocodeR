@@ -2,14 +2,14 @@
 ### UI main ###
 ### Copyright (C) 2017 Jérémy Commmins <jebins@openaliasbox.org> ###
 
-# app modules
+# modules
 source("modules/DTModule.R")
 source("modules/uploadModule.R")
 source("modules/leafletModule.R")
 source("modules/correctionModule.R")
 source("modules/manuelModule.R")
 
-# R packages
+# packages
 library(shiny)
 library(shinythemes)
 library(shinyjs)
@@ -24,7 +24,6 @@ shinyUI(
     # bootstrap theme
     theme = shinytheme("flatly"),
     useShinyjs(),
-    
     tags$head(
       # custom CSS
       tags$style(HTML("

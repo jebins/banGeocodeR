@@ -1,12 +1,18 @@
+### dataframe diplaying module ###
+# input: the reactive output of importModule : a dataframe
+# output: a reactive list (see below)
+
+
 library(shiny)
 library(htmlwidgets)
 library(leaflet)
 
-# données postales
-laposte <- read.csv('data/codes_postaux_laposte.csv', sep = ',', stringsAsFactors = FALSE)
+## postcodes data ##
+laposte <- read.csv("data/codes_postaux_laposte.csv", sep = ",", stringsAsFactors = FALSE)
 laposte[is.na(laposte)] <- "Tout"
 
-# ShinyJS
+## ShinyJS ##
+# paste the postcode variable (R) to JS for the ajax query
 jscode2 <- "
 var postcode;
 Shiny.addCustomMessageHandler('codePostalMessage', function(cdp) {
@@ -16,8 +22,7 @@ var jsonFeature; // geojson
 "
 
 
-# UI ----------------------------------------------------------------------
-
+# UI function ----------------------------------------------------------------------
 
 correctionUI <- function(id) {
   ns <- NS(id)
@@ -26,24 +31,23 @@ correctionUI <- function(id) {
     tags$head(
       tags$script(HTML(jscode2))
     ),
+    # input fields
     sidebarPanel(width = 3,
-        # selectizeInput(ns("p1"), choices = laposte$Nom_commune, selected = NULL, 
-        #                label = NULL, options = list(placeholder = "Commune", plugins = list('restore_on_backspace'))),
-        selectizeInput(ns("p2"), choices = laposte$Code_postal, selected = NULL, 
-                       label = NULL, options = list(placeholder = "Code postal", plugins = list('restore_on_backspace'))),
-        selectizeInput(ns("p3"), choices = laposte$Ligne_5, selected = NULL, 
-                       label = NULL, options = list(placeholder = "Ligne postale", plugins = list('restore_on_backspace'))),
+        selectizeInput(ns("postcode_field"), choices = laposte$Code_postal, selected = NULL, 
+                       label = NULL, options = list(placeholder = "Code postal", plugins = list("restore_on_backspace"))),
+        selectizeInput(ns("line_field"), choices = laposte$Ligne_5, selected = NULL, 
+                       label = NULL, options = list(placeholder = "Ligne postale", plugins = list("restore_on_backspace"))),
         
-        selectizeInput(ns('adresses'), label = NULL, choices = '', options = list(
-          placeholder = 'Entrer un adresse',
-          valueField = 'result_name',
-          labelField = 'result_name',
-          searchField = 'result_name',
-          # sortField = 'result_score',
+        selectizeInput(ns("address_field"), label = NULL, choices = "", options = list(
+          placeholder = "Entrer un adresse",
+          valueField = "result_name",
+          labelField = "result_name",
+          searchField = "result_name",
+          # sortField = "result_score",
           sortField = I("[{field: 'result_score', direction: 'desc'}, {field: '$score'}]"),
-          loadThrottle = '500',
+          loadThrottle = "500",
           maxOptions = 5,
-          plugins = list('restore_on_backspace'),
+          plugins = list("restore_on_backspace"),
           # hors module :
           # onChange = I("
           #              function(value, $item) {
@@ -164,10 +168,11 @@ correctionUI <- function(id) {
                    }"
           )
           )),
-          textInput(ns("commentaire_corr"), "Commentaire", placeholder = "Détails de la correction"),
+          textInput(ns("comment_field"), "Commentaire", placeholder = "Détails de la correction"),
           actionButton(ns("ajouterAdresseBtn"), "Corriger"),
           leafletOutput(ns("map"))#, height = "300px", width = "300px"),
           ),
+  # datatable
   column(width = 9,
     DT::dataTableOutput(ns("tabcorrection"))
   )
@@ -176,63 +181,55 @@ correctionUI <- function(id) {
 }
 
 
-
-# SERVEUR -----------------------------------------------------------------
-
+# server function -----------------------------------------------------------------
 
 correctionModule <- function(input, output, session, data) {
   
   ns <- session$ns
   
-  # valeurs réactives
+  # reactive values
   values <- reactiveValues()
   values$id_modif <- NULL
   
   observeEvent(data(), {
     values$adresses <- data()$df
   })
-  
-  # # champs d'adresse : code postal
-  # observe({
-  #   cdp <- laposte$Code_postal[laposte$Nom_commune == input$p1]
-  #   updateSelectInput(session, "p2", "Code_postal", choices = unique(cdp))
-  # })
 
   # champs d'adresse : ligne
   observe({
-    lig <- laposte$Ligne_5[laposte$Code_postal == input$p2]
-    if ( any(unique(lig) == 'Tout') ) {  # si ligne contient "Tout"
-      selec <- 'Tout' # sélection par défaut vaut "Tout"
+    lig <- laposte$Ligne_5[laposte$Code_postal == input$postcode_field]
+    if ( any(unique(lig) == "Tout") ) {  # si ligne contient "Tout"
+      selec <- "Tout" # sélection par défaut vaut "Tout"
     } else {
-      selec <- ''
+      selec <- ""
     }
-    updateSelectInput(session, "p3", "Ligne_5", choices = lig, selected = selec)
-    session$sendCustomMessage("codePostalMessage", input$p2)  # message JS pour ajax : code postal
+    updateSelectInput(session, "line_field", "Ligne_5", choices = lig, selected = selec)
+    session$sendCustomMessage("codePostalMessage", input$postcode_field)  # message JS pour ajax : code postal
   })
   
-  # boutton "ajouter"
+  # activate "ajouter" button only if an addresse is selected
   observe({
     shinyjs::toggleState("ajouterAdresseBtn", condition = (!is.null(input$tabcorrection_rows_selected)))
   })
   
-  # adresse sélectionnée
+  # selected addresse
   adresseSelec <- reactive({
-    req(input$adresses)
+    req(input$address_field)
     df <- values$adresseSelec
     df <- as.list(df)
     return(df)
   })
   
+  # when a JSON is received in the browser
   observeEvent(input$jsonFeature, {
-    # values$jsonFeature <- toJSON(input$jsonFeature)
     cat(file=stderr(), paste("JSON BAN valide"), "\n")
     values$adresseSelec <- input$jsonFeature
     cat(file=stderr(), paste(values$adresseSelec), "\n")
   })
   
   observe({
-    updateSelectInput(session, "p2", "Code_postal", selected = values$adresses[input$tabcorrection_rows_selected, ]$V_codp, choices = NULL)
-    updateSelectInput(session, "adresses", "adresse", selected = values$adresses[input$tabcorrection_rows_selected, ]$V_adres)
+    updateSelectInput(session, "postcode_field", "Code_postal", selected = values$adresses[input$tabcorrection_rows_selected, ]$V_codp, choices = NULL)
+    updateSelectInput(session, "address_field", "Adresse", selected = values$adresses[input$tabcorrection_rows_selected, ]$V_adres)
   })
   
   # ajouter adresse au df final
@@ -246,43 +243,41 @@ correctionModule <- function(input, output, session, data) {
         }
       }
     }
-    values$adresses[input$tabcorrection_rows_selected, 'commentaire_correction'] <- input$commentaire_corr
-    values$id_modif <- c(values$id_modif, values$adresses[input$tabcorrection_rows_selected, 'geocodID'])
-    updateTextInput(session, 'commentaire_corr', label = 'Commentaire', value = '', placeholder = 'Détails de la correction')
+    values$adresses[input$tabcorrection_rows_selected, "commentaire_correction"] <- input$comment_field
+    values$id_modif <- c(values$id_modif, values$adresses[input$tabcorrection_rows_selected, "geocodID"])
+    updateTextInput(session, "comment_field", label = "Commentaire", value = "", placeholder = "Détails de la correction")
     cat(file=stderr(), unlist(adresseSelec()), "\n")
     
   })
   
   
-  test <- reactive({
+  addresses <- reactive({
     return(values$adresses)
   })
 
 
-# datatable
-
+## datatable ##
   
   table <- reactive({
     
-    datatable(test(),
+    datatable(addresses(),
               rownames = FALSE,
-              style = 'bootstrap',
-              class = 'table-bordered table-condensed table-striped',
-              extensions = list('Buttons' = NULL),
-              selection = list(mode = 'single', selected = NULL),
+              style = "bootstrap",
+              class = "table-bordered table-condensed table-striped",
+              extensions = list("Buttons" = NULL),
+              selection = list(mode = "single", selected = NULL),
               options = list(pageLength = 15,
                              autoWidth = FALSE,
-                             # scrollX = TRUE,
                              fixedHeader = FALSE,
-                             dom = 'Btp', #lBfrtip
-                             buttons = list(list(extend = 'collection',
-                                                 buttons = c('csv', 'excel'),
-                                                 text = 'Enregistrer'),
-                                            I('colvis')
+                             dom = "Btp",
+                             buttons = list(list(extend = "collection",
+                                                 buttons = c("csv", "excel"),
+                                                 text = "Enregistrer"),
+                                            I("colvis")
                              ),
                              searchHighlight = TRUE,
                              columnDefs = list(list(visible = FALSE, targets = data()$col_indices)),
-                             language = list(url = '//cdn.datatables.net/plug-ins/1.10.13/i18n/French.json')
+                             language = list(url = "//cdn.datatables.net/plug-ins/1.10.13/i18n/French.json")
               )
     )
     
@@ -322,8 +317,11 @@ correctionModule <- function(input, output, session, data) {
       )
   })
   
+  ## reactive output ##
+  # - dataframe
+  # - ids of the edited rows
   reactive({
-    return(list(df = test(), id_modif = values$id_modif))
+    return(list(df = addresses(), id_modif = values$id_modif))
   })
   
 }

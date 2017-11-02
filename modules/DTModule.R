@@ -1,5 +1,5 @@
 ### dataframe diplaying module ###
-# input: the reactive output of importModule
+# input: the reactive output of importModule : a dataframe
 # output: a reactive list (see below)
 
 
@@ -13,7 +13,7 @@ DTtableUI <- function(id) {
   ns <- NS(id)
   tagList(
     column(width = 9,
-           withSpinner(color="#0dc5c1", DT::dataTableOutput(ns('table')))
+           withSpinner(color="#0dc5c1", DT::dataTableOutput(ns("table")))
     )
   )
 }
@@ -26,9 +26,9 @@ DTtable <- function(input, output, session, data) {
   # select addresses with a result_score < 0.6 by default
   selection <- reactive({
     if ( data()$geocode ) {
-      return(list(mode = 'multiple', selected = which(data()$df$result_score < 0.6 | is.na(data()$df$result_score))))
+      return(list(mode = "multiple", selected = which(data()$df$result_score < 0.6 | is.na(data()$df$result_score))))
     } else {
-      return(list(mode = 'none', selected = NULL))
+      return(list(mode = "none", selected = NULL))
     }
   })
   
@@ -37,22 +37,22 @@ DTtable <- function(input, output, session, data) {
     
     datatable(data()$df,
               rownames = FALSE,
-              style = 'bootstrap',
-              class = 'table-bordered table-condensed table-striped',
-              extensions = list('Buttons' = NULL),
+              style = "bootstrap",
+              class = "table-bordered table-condensed table-striped",
+              extensions = list("Buttons" = NULL),
               selection = selection(),
               options = list(pageLength = 15,
                              autoWidth = FALSE,
                              fixedHeader = FALSE,
-                             dom = 'lfBrtip',
-                             buttons = list(list(extend = 'collection',
-                                                 buttons = c('csv', 'excel'),
-                                                 text = 'Enregistrer'),
-                                            I('colvis')
+                             dom = "lfBrtip",
+                             buttons = list(list(extend = "collection",
+                                                 buttons = c("csv", "excel"),
+                                                 text = "Enregistrer"),
+                                            I("colvis")
                              ),
                              searchHighlight = TRUE,
                              columnDefs = list(list(visible = FALSE, targets = data()$col_indices$invisible )),
-                             language = list(url = '//cdn.datatables.net/plug-ins/1.10.13/i18n/French.json')
+                             language = list(url = "//cdn.datatables.net/plug-ins/1.10.13/i18n/French.json")
               )
     )
     
@@ -69,14 +69,14 @@ DTtable <- function(input, output, session, data) {
       
       table() %>%
         formatStyle(
-          'result_score',
+          "result_score",
           backgroundColor = styleInterval(brks, clrs)
         ) %>%
         formatStyle(
-          'result_type',
-          color = styleEqual(c("housenumber", "street", "locality"), c('green', 'darkorange', 'red')),
-          fontWeight = 'bold'
-          # backgroundColor = styleInterval(3.4, c('gray', 'yellow'))
+          "result_type",
+          color = styleEqual(c("housenumber", "street", "locality"), c("green", "darkorange", "red")),
+          fontWeight = "bold"
+          # backgroundColor = styleInterval(3.4, c("gray", "yellow"))
         )
       
     } else {
