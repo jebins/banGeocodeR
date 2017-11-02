@@ -9,7 +9,7 @@ library(RColorBrewer)
 
 # UI function -------------------------------------------------------------
 
-DTtableUI <- function(id) {
+csvDatatableUI <- function(id) {
   ns <- NS(id)
   tagList(
     column(width = 9,
@@ -21,7 +21,7 @@ DTtableUI <- function(id) {
 
 # server function ---------------------------------------------------------
 
-DTtable <- function(input, output, session, data) {
+csvDatatable <- function(input, output, session, data) {
   
   # select addresses with a result_score < 0.6 by default
   selection <- reactive({
@@ -52,6 +52,7 @@ DTtable <- function(input, output, session, data) {
                              ),
                              searchHighlight = TRUE,
                              columnDefs = list(list(visible = FALSE, targets = data()$col_indices$invisible )),
+                             # french internationalization
                              language = list(url = "//cdn.datatables.net/plug-ins/1.10.13/i18n/French.json")
               )
     )

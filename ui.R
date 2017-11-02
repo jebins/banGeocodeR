@@ -48,18 +48,18 @@ shinyUI(
                
                tabPanel("Import des données",
                  fluidRow(
-                   uploadModuleUI("datafile"),
-                   DTtableUI("tabimport")
+                   csvUploadUI("imported_file"),
+                   csvDatatableUI("displayed_table")
                  )
                ),
                tabPanel("Correction des adresses",
                  fluidRow(
-                   correctionUI("tabcorrection")
+                   csvCorrectionUI("correction_table")
                  )
                ),
                tabPanel("Carte dynamique",
                  fluidRow(
-                   leafletModuleUI("carte_csv")
+                   csvMapUI("results_map")
                  )
                )
                
@@ -68,9 +68,10 @@ shinyUI(
     tabPanel("Géocodage manuel",
              
              fluidRow(
-               manuelUI("tabmanuel")
+               manualGeocodingUI("manual_geocoding")
              )
     ),
+    # about tab
     tabPanel("À propos"),
     
     # default tab

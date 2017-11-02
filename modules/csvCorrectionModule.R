@@ -24,7 +24,7 @@ var jsonFeature; // geojson
 
 # UI function ----------------------------------------------------------------------
 
-correctionUI <- function(id) {
+csvCorrectionUI <- function(id) {
   ns <- NS(id)
   
   tagList(
@@ -183,7 +183,7 @@ correctionUI <- function(id) {
 
 # server function -----------------------------------------------------------------
 
-correctionModule <- function(input, output, session, data) {
+csvCorrection <- function(input, output, session, data) {
   
   ns <- session$ns
   

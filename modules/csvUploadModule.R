@@ -13,7 +13,7 @@ library(RCurl)
 
 # UI function -------------------------------------------------------------
 
-uploadModuleUI <- function(id) {
+csvUploadUI <- function(id) {
   # namespace
   ns <- NS(id)
   # UI elements
@@ -32,7 +32,7 @@ uploadModuleUI <- function(id) {
 
 # server function ---------------------------------------------------------
 
-uploadModule <- function(input, output, session) {
+csvUpload <- function(input, output, session) {
   
   # reactive values container
   values <- reactiveValues()

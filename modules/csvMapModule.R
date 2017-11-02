@@ -9,7 +9,7 @@ library(plyr)
 
 # UI function -------------------------------------------------------------
 
-leafletModuleUI <- function(id) {
+csvMapUI <- function(id) {
   ns <- NS(id)
   
   tagList(
@@ -21,7 +21,7 @@ leafletModuleUI <- function(id) {
 
 # server function ---------------------------------------------------------
 
-leafletModule <- function(input, output, session, data_brut, data_corr) {
+csvMap <- function(input, output, session, data_brut, data_corr) {
   
   ## reactive dataframe : ##
   # - if rows were edited in the correction module : (orginal df - rows edited) + rows edited

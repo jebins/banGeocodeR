@@ -6,14 +6,18 @@
 # server function ---------------------------------------------------------
 
 function(input, output) {
+  
+  ## csv geocoding
   # file import
-  datafile <- callModule(uploadModule, "datafile")
+  imported_file <- callModule(csvUpload, "imported_file")
   # datatable
-  tabselect <- callModule(DTtable, "tabimport", reactive( datafile() ))
+  displayed_table <- callModule(csvDatatable, "displayed_table", reactive( imported_file() ))
   # addresses correction
-  tabcorr <- callModule(correctionModule, "tabcorrection", reactive( tabselect() ))
+  correction_table <- callModule(csvCorrection, "correction_table", reactive( displayed_table() ))
   # map
-  callModule(leafletModule, "carte_csv", data_brut = reactive( datafile() ), data_corr = reactive( tabcorr() ))
-  # manual geocoding
-  callModule(manuelModule, "tabmanuel")
+  callModule(csvMap, "results_map", data_brut = reactive( imported_file() ), data_corr = reactive( correction_table() ))
+  
+  ## manual geocoding
+  callModule(manualGeocoding, "manual_geocoding")
+  
 }

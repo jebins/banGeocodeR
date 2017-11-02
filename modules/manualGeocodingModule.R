@@ -23,7 +23,7 @@ shinyjs.init = function () {
 
 # UI function ----------------------------------------------------------------------
 
-manuelUI <- function(id) {
+manualGeocodingUI <- function(id) {
   ns <- NS(id)
   
   tagList(
@@ -193,7 +193,7 @@ $(document).on('click', '#tabmanuel-tabmanuel button', function () {
 
 # server function -----------------------------------------------------------------
 
-manuelModule <- function(input, output, session, data) {
+manualGeocoding <- function(input, output, session, data) {
   
   ns <- session$ns
   
