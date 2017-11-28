@@ -66,13 +66,22 @@ shinyUI(
              )
     ),
     tabPanel("Géocodage manuel",
-             
              fluidRow(
                manualGeocodingUI("manual_geocoding")
              )
     ),
     # about tab
-    tabPanel("À propos"),
+    tabPanel("À propos",
+             h1("GeocodeR"),
+             p("GeocodeR est une application R Shiny expérimentale, permettant de géocoder des adresses en France. 
+             L'application utilise la Base Adresse Nationale, la base de données officielle des adresses françaises. 
+             GeocodeR a été développé dans le cadre d'un projet de recherche mené par le Centre Hospitalier Universitaire 
+             de La Réunion et est pour l'instant limité à La Réunion."),
+             div(align = "center",
+                 img(src="logos/logo_ird.png", align = "center"),
+                 img(src="logos/logo_chu.png", align = "center")
+                 )
+             ),
     
     # default tab
     selected = "Géocodage CSV"
