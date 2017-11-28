@@ -1,5 +1,5 @@
 ### geocodeR ###
-### UI main ###
+### UI : main ###
 ### Copyright (C) 2017 Jérémy Commmins <jebins@openaliasbox.org> ###
 
 # modules

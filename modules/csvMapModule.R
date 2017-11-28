@@ -60,11 +60,34 @@ csvMap <- function(input, output, session, data_brut, data_corr) {
         addCircleMarkers(lng = data_all()$longitude,
                          lat = data_all()$latitude,
                          weight = 1, radius = 4,
-                         popup = paste0("QIDENT : ",
-                                        as.character(data_all()$V_adres),
-                                        "<br/>", "V_adres : ",
-                                        as.character(data_all()$result_label))
-        )
+                         # popup = paste0("Adresse originale : ",
+                         #                as.character(data_all()[data_brut()$col_indices$invisible[1], ]),
+                         #                "<br/>", "Adresse BAN : ",
+                         #                as.character(data_all()$result_label),
+                         #                "Score : ",
+                         #                as.character(data_all()$result_score))
+                         popup = paste0("<table class='table table-striped'>", "<tbody>",
+                                        "<tr>",
+                                        "<td>", "Adresse originale : ", "</td>",
+                                        "<td>", as.character(data_all()[data_brut()$col_indices$invisible[1], ]), "</td>",
+                                        "</tr>",
+                                        "<tr>",
+                                        "<td>", "Adresse BAN : ", "</td>",
+                                        "<td>", as.character(data_all()$result_label), "</td>",
+                                        "</tr>",
+                                        "<tr>",
+                                        "<td>", "Score : ", "</td>",
+                                        "<td>", as.character(data_all()$result_score), "</td>",
+                                        "<tr>",
+                                        "</tbody>", "</table>"
+                                          
+                         )
+        ) %>%
+        addEasyButton(easyButton(
+          icon = 'ion-arrow-shrink',
+          title = 'Recentrer la vue',
+          onClick = JS("function(btn, map){ map.setView([0,0],0); }")))
+    
       
     } else {
       NULL

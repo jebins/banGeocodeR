@@ -31,12 +31,12 @@ manualGeocodingUI <- function(id) {
       tags$script(HTML(jscode)),
       ## inrow delete button ##
       tags$script(sprintf("
-$(document).on('click', '#tabmanuel-tabmanuel button', function () {
+$(document).on('click', '#manual_geocoding-tabmanuel button', function () {
  console.log('suppression ligne');
  Shiny.onInputChange('%s',this.id);
  Shiny.onInputChange('%s', Math.random())
- });", 
-                  ns("lastClickId"), ns("lastClick"))),
+ });",
+                          ns("lastClickId"), ns("lastClick"))),
       includeScript("./www/split.min.js"),
       tags$style(HTML("
   . {
@@ -223,7 +223,7 @@ manualGeocoding <- function(input, output, session, data) {
     session$sendCustomMessage("codePostalMessage", input$postcode_field)  # message JS pour ajax : code postal
   })
   
-  # activate "Ajouter" button only if an addresse is selected
+  # activate "Ajouter" button only if an address is selected
   observe({
     shinyjs::toggleState("ajouterAdresseBtn", condition = (!is.null(input$address_field)))
   })
@@ -235,7 +235,7 @@ manualGeocoding <- function(input, output, session, data) {
     cat(file=stderr(), paste(values$adresseSelec), "\n")
   })
   
-  # selected addresse
+  # selected address
   adresseSelec <- reactive({
     req(input$address_field)
     df <- values$adresseSelec
