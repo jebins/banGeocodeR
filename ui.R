@@ -1,4 +1,4 @@
-### BANgeocodeR ###
+### banGeocodeR ###
 ### UI : main ###
 ### Copyright (C) 2017 Jérémy Commmins ###
 
@@ -20,7 +20,7 @@ library(shinycssloaders)
 
 shinyUI(
   
-  navbarPage("BANgeocodeR",
+  navbarPage("banGeocodeR",
     # bootstrap theme
     theme = shinytheme("flatly"),
     useShinyjs(),
@@ -72,10 +72,10 @@ shinyUI(
     ),
     # about tab
     tabPanel("À propos",
-             h1("GeocodeR"),
-             p("GeocodeR est une application R Shiny expérimentale, permettant de géocoder des adresses en France. 
+             h1("banGeocodeR"),
+             p("banGeocodeR est une application R Shiny expérimentale, permettant de géocoder des adresses en France. 
              L'application utilise la Base Adresse Nationale, la base de données officielle des adresses françaises. 
-             GeocodeR a été développé dans le cadre d'un projet de recherche mené par le Centre Hospitalier Universitaire 
+             banGeocodeR a été développé dans le cadre d'un projet de recherche mené par le Centre Hospitalier Universitaire 
              de La Réunion et est pour l'instant limité à La Réunion."),
              div(align = "center",
                  img(src="logos/logo_ird.png", align = "center"),

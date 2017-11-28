@@ -1,4 +1,4 @@
-### BANgeocodeR ###
+### banGeocodeR ###
 ### server : main ###
 ### Copyright (C) 2017 Jérémy Commmins ###
 
