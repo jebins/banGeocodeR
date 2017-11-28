@@ -7,7 +7,7 @@ banGeocodeR est une application R Shiny expérimentale, permettant de géocoder 
 
 ## Dependencies
 ```r
-install.packages("shiny", "shinythemes", "shinyjs", "shinycssloaders", "DT", "leaflet", "httr", "RCurl", "plyr", "RColorBrewer")
+install.packages(c("shiny", "shinythemes", "shinyjs", "shinycssloaders", "DT", "leaflet", "httr", "RCurl", "plyr", "RColorBrewer"))
 ```
 
 ## Data sources
