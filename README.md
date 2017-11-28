@@ -1,9 +1,9 @@
-# GeocodeR
+# BANgeocodeR
 
 ## Description
-GeocodeR is an experimental R Shiny App allowing the geocoding of addresses in France. The app uses the Base Adresse Nationale, the offical french addresses database. GeocodeR was developped as part of a research project by the Centre Hospitalier Universitaire de La Réunion and is limited to Réunion for the moment.
+BANgeocodeR is an experimental R Shiny App allowing the geocoding of addresses in France. The app uses the Base Adresse Nationale (BAN), the offical french addresses database. BANgeocodeR was developped as part of a research project by the Centre Hospitalier Universitaire de La Réunion and is limited to Réunion for the moment.
 
-GeocodeR est une application R Shiny expérimentale, permettant de géocoder des adresses en France. L'application utilise la Base Adresse Nationale, la base de données officielle des adresses françaises. GeocodeR a été développé dans le cadre d'un projet de recherche mené par le Centre Hospitalier Universitaire de La Réunion et est pour l'instant limité à La Réunion.
+BANgeocodeR est une application R Shiny expérimentale, permettant de géocoder des adresses en France. L'application utilise la Base Adresse Nationale (BAN), la base de données officielle des adresses françaises. BANgeocodeR a été développé dans le cadre d'un projet de recherche mené par le Centre Hospitalier Universitaire de La Réunion et est pour l'instant limité à La Réunion.
 
 ## Dependencies
 ```r

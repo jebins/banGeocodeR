@@ -1,4 +1,4 @@
-### geocodeR ###
+### BANgeocodeR ###
 ### UI : main ###
 ### Copyright (C) 2017 Jérémy Commmins ###
 
