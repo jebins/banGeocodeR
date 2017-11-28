@@ -20,7 +20,7 @@ library(shinycssloaders)
 
 shinyUI(
   
-  navbarPage("Géocodeur BAN",
+  navbarPage("BANgeocodeR",
     # bootstrap theme
     theme = shinytheme("flatly"),
     useShinyjs(),
