@@ -39,7 +39,7 @@ csvCorrectionUI <- function(id) {
                        label = NULL, options = list(placeholder = "Ligne postale", plugins = list("restore_on_backspace"))),
         
         selectizeInput(ns("address_field"), label = NULL, choices = "", options = list(
-          placeholder = "Entrer un adresse",
+          placeholder = "Entrer une adresse",
           valueField = "result_name",
           labelField = "result_name",
           searchField = "result_name",
