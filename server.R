@@ -1,6 +1,6 @@
 ### geocodeR ###
 ### server : main ###
-### Copyright (C) 2017 Jérémy Commmins <jebins@openaliasbox.org>
+### Copyright (C) 2017 Jérémy Commmins ###
 
 
 # server function ---------------------------------------------------------

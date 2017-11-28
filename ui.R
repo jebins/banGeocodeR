@@ -1,6 +1,6 @@
 ### geocodeR ###
 ### UI : main ###
-### Copyright (C) 2017 Jérémy Commmins <jebins@openaliasbox.org> ###
+### Copyright (C) 2017 Jérémy Commmins ###
 
 # modules
 source("modules/csvDatatableModule.R")
