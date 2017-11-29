@@ -79,7 +79,9 @@ shinyUI(
              de La Réunion et est pour l'instant limité à La Réunion."),
              div(align = "center",
                  img(src="logos/logo_ird.png", align = "center"),
+                 img(src="logos/logo_espacedev.jpg", align = "center"),
                  img(src="logos/logo_chu.png", align = "center")
+                 
                  )
              ),
     
