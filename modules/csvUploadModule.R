@@ -103,10 +103,10 @@ csvUpload <- function(input, output, session) {
     values$df_ban["geocodID"] <- seq(1:nrow(values$df_ban))
     
     
-    ## get information about the dataframe columns ##
-    # this will be useful for the dataframe formatting (in the dataframeModule)
+    ## collect informations about the dataframe columns ##
+    # this will be useful for the dataframe formatting
     
-    # addresse and postcode columns indexes (input fields)
+    # address and postcode columns indexes (input fields)
     indices_cdp_adr <- list(
       grep( paste("^", input$postcode_field, "$" , sep="", collapse=""), names(values$df_ban)) - 1,
       grep( paste("^", input$address_field, "$", sep="", collapse=""), names(values$df_ban)) - 1
@@ -120,6 +120,7 @@ csvUpload <- function(input, output, session) {
     
     # columns to show : both input fields and useful BAN columns
     colonnes_afficher <- append(indices_cdp_adr, as.numeric(unlist(colonnes_ban_indices)))
+    cat(file=stderr(), "Columns displayed:", paste(colonnes_afficher), "\n")
     
     # columns to hide : the remaining
     colonnes_pas_afficher <- setdiff(2:length(values$df_ban)-1, colonnes_afficher)
@@ -130,6 +131,7 @@ csvUpload <- function(input, output, session) {
     # reactive value containing the column indexes
     values$df_columns_index <- list(
       score = score,
+      afficher = colonnes_afficher,
       invisible = colonnes_pas_afficher
     )
     cat(file=stderr(), "Hidden columns:", paste(values$df_columns_index$invisible), "\n")
