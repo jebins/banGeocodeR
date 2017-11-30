@@ -23,6 +23,14 @@ csvMapUI <- function(id) {
 
 csvMap <- function(input, output, session, data_brut, data_corr) {
   
+  observeEvent(data_all(), {
+    print("afficher") ; print(data_brut()$col_indices$afficher[[2]])
+    print("invisibl") ; print(data_brut()$col_indices$invisible[1])
+    print("brut") ; print(names(data_brut()$df))
+    print("all") ; print(names(data_all()))
+    print("adrind") ; print(address_index())
+  })
+  
   ## reactive dataframe : ##
   # - if rows were edited in the correction module : (orginal df - original rows edited) + rows edited
   # - else : original df
@@ -35,6 +43,10 @@ csvMap <- function(input, output, session, data_brut, data_corr) {
       return(data_brut()$df)
     }
   })
+  
+  # address field index in the final dataframe
+  # "+1" because of the previous grep operation (-1)
+  address_index <- reactive({data_brut()$col_indices$afficher[[2]] + 1})
   
   ## download data ##
   output$enregistrer <- downloadHandler(
@@ -57,15 +69,14 @@ csvMap <- function(input, output, session, data_brut, data_corr) {
                          group = "CartoDB", 
                          options = providerTileOptions(opacity = 1, minZoom = 0, maxZoom = 21)
         ) %>%
-        addCircleMarkers(data = data_all(),
-                         lng = data_all()$longitude,
+        addCircleMarkers(lng = data_all()$longitude,
                          lat = data_all()$latitude,
                          weight = 1, radius = 4,
                          group = "points",
                          popup = paste0("<table class='table table-striped'>", "<tbody>",
                                         "<tr>",
                                         "<td>", "Adresse originale : ", "</td>",
-                                        "<td>", as.character(data_all()[data_brut()$col_indices$invisible[1], ]), "</td>",
+                                        "<td>", as.character(data_all()[ , address_index() ]), "</td>",
                                         "</tr>",
                                         "<tr>",
                                         "<td>", "Adresse BAN : ", "</td>",
