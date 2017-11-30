@@ -22,7 +22,7 @@ banGeocodeR is an experimental R Shiny App allowing the geocoding of addresses i
 The geocoding is **limited to Réunion** for the moment.
 
 ## Authors
-banGeocodeR is carried out by [UMR Espace-Dev](LIEN) (IRD, Univ. Guyane, Univ. Montpellier, Univ. Réunion) in ESoR research group (Environment, Societies and Health Risks). It was initially developed for the needs of the FOSFORE research project coordinated by the Cancer Registry of Réunion (Emmanuel Chirpaz) at the Réunion hospital (CHU Réunion).
+banGeocodeR is carried out by [UMR Espace-Dev](http://www.espace-dev.fr/) (IRD, Univ. Guyane, Univ. Montpellier, Univ. Réunion) in ESoR research group (Environment, Societies and Health Risks). It was initially developed for the needs of the FOSFORE research project coordinated by the Cancer Registry of Réunion (Emmanuel Chirpaz) at the Réunion hospital (CHU Réunion).
 
 * Design and developement : Jérémy Commins, French National Research Institute for Sustainable Development (IRD) - UMR Espace-Dev.
 * Design : Vincent Herbreteau, French National Research Institute for Sustainable Developmen (IRD) - UMR Espace-Dev.
