@@ -343,8 +343,18 @@ manualGeocoding <- function(input, output, session, data) {
       ) %>%
       addCircleMarkers(lng = adresseSelec()$longitude,
                        lat = adresseSelec()$latitude,
-                       weight = 1, radius = 5
-      ) 
+                       weight = 1, radius = 5,
+                       group = "points"
+      ) %>%
+      # center view on markers
+      addEasyButton(easyButton(
+        icon = 'ion-arrow-shrink',
+        title = 'Recentrer la vue',
+        onClick = JS("function(btn, map) {
+                       var groupLayer = map.layerManager.getLayerGroup('points');
+                       map.fitBounds(groupLayer.getBounds()); 
+                    }")
+      ))
   })
   
   
@@ -388,8 +398,18 @@ manualGeocoding <- function(input, output, session, data) {
                        lat = tabmanuel_()$latitude,
                        layerId = tabmanuel_()$result_label,
                        label = labels(),
-                       weight = 1, radius = 6
-      ) 
+                       weight = 1, radius = 6,
+                       group = "points"
+      ) %>%
+      # center view on markers
+      addEasyButton(easyButton(
+        icon = 'ion-arrow-shrink',
+        title = 'Recentrer la vue',
+        onClick = JS("function(btn, map) {
+                       var groupLayer = map.layerManager.getLayerGroup('points');
+                       map.fitBounds(groupLayer.getBounds()); 
+                    }")
+      ))
   })
   
   # map rendering

@@ -24,7 +24,7 @@ csvMapUI <- function(id) {
 csvMap <- function(input, output, session, data_brut, data_corr) {
   
   ## reactive dataframe : ##
-  # - if rows were edited in the correction module : (orginal df - rows edited) + rows edited
+  # - if rows were edited in the correction module : (orginal df - original rows edited) + rows edited
   # - else : original df
   data_all <- reactive({
     if ( !is.null(data_corr()$id_modif) ) {
@@ -57,15 +57,11 @@ csvMap <- function(input, output, session, data_brut, data_corr) {
                          group = "CartoDB", 
                          options = providerTileOptions(opacity = 1, minZoom = 0, maxZoom = 21)
         ) %>%
-        addCircleMarkers(lng = data_all()$longitude,
+        addCircleMarkers(data = data_all(),
+                         lng = data_all()$longitude,
                          lat = data_all()$latitude,
                          weight = 1, radius = 4,
-                         # popup = paste0("Adresse originale : ",
-                         #                as.character(data_all()[data_brut()$col_indices$invisible[1], ]),
-                         #                "<br/>", "Adresse BAN : ",
-                         #                as.character(data_all()$result_label),
-                         #                "Score : ",
-                         #                as.character(data_all()$result_score))
+                         group = "points",
                          popup = paste0("<table class='table table-striped'>", "<tbody>",
                                         "<tr>",
                                         "<td>", "Adresse originale : ", "</td>",
@@ -83,11 +79,15 @@ csvMap <- function(input, output, session, data_brut, data_corr) {
                                           
                          )
         ) %>%
+        # center view on markers
         addEasyButton(easyButton(
           icon = 'ion-arrow-shrink',
           title = 'Recentrer la vue',
-          onClick = JS("function(btn, map){ map.setView([0,0],0); }")))
-    
+          onClick = JS("function(btn, map) {
+                       var groupLayer = map.layerManager.getLayerGroup('points');
+                       map.fitBounds(groupLayer.getBounds()); 
+                    }")
+        ))
       
     } else {
       NULL
