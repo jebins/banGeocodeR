@@ -6,23 +6,23 @@ output:
 # banGeocodeR
 
 ## Description
-banGeocodeR is an experimental R Shiny App allowing the geocoding of addresses in France. The app uses the [Base Adresse Nationale (BAN)](https://adresse.data.gouv.fr/), the offical french addresses database. It aims to provide two main features :
+banGeocodeR is an experimental R Shiny App allowing the geocoding of addresses in France. The app uses the [Base Adresse Nationale (BAN)](https://adresse.data.gouv.fr/), the offical French address database. It provides two main features :
 
 ### CSV file geocoding
 * geocode a CSV formatted file containing addresses (< 8 Mo)
 * highlight possible errors and correct them
 * display the results on an interactive map
-* save the final table
+* export the geocoded table
 
 ### Live geocoding
-* geocode typed addresses
+* geocode addresses one by one
 * add them to a table
-* save the whole table
+* export the geocoded table
 
 The geocoding is **limited to Réunion** for the moment.
 
 ## Authors
-banGeocodeR is carried out by UMR Espace-Dev (IRD, Univ. Guyane, Univ. Montpellier, Univ. Réunion) in ESoR axis (Environment, Societies and Health Risks). It was initially developed for the needs of the FOSFORE research project coordinated by the Réunion Cancers Registry (Emmanuel Chirpaz) of the Hospital University Centre of Réunion (CHU Réunion).
+banGeocodeR is carried out by [UMR Espace-Dev](LIEN) (IRD, Univ. Guyane, Univ. Montpellier, Univ. Réunion) in ESoR research group (Environment, Societies and Health Risks). It was initially developed for the needs of the FOSFORE research project coordinated by the Cancer Registry of Réunion (Emmanuel Chirpaz) at the Réunion hospital (CHU Réunion).
 
 * Design and developement : Jérémy Commins, French National Research Institute for Sustainable Development (IRD) - UMR Espace-Dev.
 * Design : Vincent Herbreteau, French National Research Institute for Sustainable Developmen (IRD) - UMR Espace-Dev.
